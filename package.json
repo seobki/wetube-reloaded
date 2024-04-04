@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --exec babel-node src/server.js"
+    "dev": "nodemon --exec babel-node src/init.js"
   },
   "repository": {
     "type": "git",
@@ -18,11 +18,15 @@
   "homepage": "https://github.com/seobki/wetube-reloaded#readme",
   "dependencies": {
     "express": "^4.18.3",
-    "morgan": "^1.10.0"
+    "mongoose": "^8.2.4",
+    "morgan": "^1.10.0",
+    "pug": "^3.0.2"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
-    "nodemon": "^3.1.0"
+    "@prettier/plugin-pug": "^3.0.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.2.5"
   }
 }
