@@ -17,7 +17,10 @@
   },
   "homepage": "https://github.com/seobki/wetube-reloaded#readme",
   "dependencies": {
+    "bcrypt": "^5.1.1",
+    "connect-mongo": "^5.1.0",
     "express": "^4.18.3",
+    "express-session": "^1.18.0",
     "mongoose": "^8.2.4",
     "morgan": "^1.10.0",
     "pug": "^3.0.2"
