@@ -196,12 +196,103 @@ export const finishKakaoLogin = async (req, res) => {
   }
 };
 
-export const edit = (req, res) => res.send("Edit User");
+export const getEdit = (req, res) => {
+  return res.render("edit-profile", { pageTitle: "Edit Profile" });
+};
+export const postEdit = async (req, res) => {
+  const {
+    session: {
+      user: { _id, avatarUrl, email: pastEmail, username: pastUsername },
+    },
+    body: { name, email, username, location },
+    file,
+  } = req;
+  console.log(file);
+  const pageTitle = "Edit Profile";
+  // Change email
+  if (email !== pastEmail) {
+    // Check if there is same email in mongoDB
+    const checkEmail = await User.exists({ email });
+    if (checkEmail) {
+      return res.status(400).render("users/mypage", {
+        pageTitle,
+        errorMessage: "This email is already taken",
+      });
+    }
+  }
+  // Check username
+  if (username !== pastUsername) {
+    // Check if there is same username in mongoDB
+    const checkUsername = await User.exists({ username });
+    if (checkUsername) {
+      return res.status(400).render("users/mypage", {
+        pageTitle,
+        errorMessage: "This username is already taken",
+      });
+    }
+  }
+  // Can't change email whose logged in using social media
+  const findSocialOnly = await User.findOne({ socialOnly: true });
+  if (findSocialOnly && email !== pastEmail) {
+    return res.status(400).render("users/mypage", {
+      pageTitle,
+      errorMessage: "This ID using social media can not change the email.",
+    });
+  }
+  const updateUser = await User.findByIdAndUpdate(
+    _id,
+    {
+      // ⚠️ NEVER SAVE THE IMAGE FILE ON THE DATABASE, SAVE PATH OF THAT FILE ⚠️
+      avatarUrl: file ? file.path : avatarUrl, // when avatarUrl has not changed, it will be error since file.path is going to be undefined.
+      name,
+      email,
+      username,
+      location,
+    },
+    { new: true }
+  );
+  req.session.user = updateUser;
+  return res.redirect("/users/mypage");
+};
+
 export const remove = (req, res) => res.send("Remove User");
 
 export const logout = (req, res) => {
   req.session.destroy();
   return res.redirect("/");
+};
+
+export const getChangePassword = (req, res) => {
+  if (req.session.user.socialOnly === true) {
+    return res.redirect("/");
+  }
+  return res.render("users/change-password", { pageTitle: "Change Password" });
+};
+
+export const postChangePassword = async (req, res) => {
+  const {
+    session: {
+      user: { _id },
+    },
+    body: { oldPassword, newPassword, newPasswordConfirmation },
+  } = req;
+  const user = await User.findById(_id);
+  const ok = await bcrypt.compare(oldPassword, user.password);
+  if (!ok) {
+    return res.status(400).render("users/change-password", {
+      pageTitle: "Change Password",
+      errorMessage: "The current password is incorrect",
+    });
+  }
+  if (newPassword !== newPasswordConfirmation) {
+    return res.status(400).render("users/change-password", {
+      pageTitle: "Change Password",
+      errorMessage: "The password does not match the confirmation",
+    });
+  }
+  user.password = newPassword;
+  await user.save();
+  return res.redirect("/users/logout");
 };
 
 export const see = (req, res) => res.send("See User");
