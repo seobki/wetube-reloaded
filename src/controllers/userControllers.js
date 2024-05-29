@@ -207,7 +207,6 @@ export const postEdit = async (req, res) => {
     body: { name, email, username, location },
     file,
   } = req;
-  console.log(file);
   const pageTitle = "Edit Profile";
   // Change email
   if (email !== pastEmail) {
@@ -295,4 +294,14 @@ export const postChangePassword = async (req, res) => {
   return res.redirect("/users/logout");
 };
 
-export const see = (req, res) => res.send("See User");
+export const see = async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
+  if (!user) {
+    return res.status(404).render("404");
+  }
+  return res.render("users/profile", {
+    pageTitle: `${user.name} Profile`,
+    user,
+  });
+};
