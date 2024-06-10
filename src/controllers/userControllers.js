@@ -1,4 +1,5 @@
 import User from "../models/User";
+import Video from "../models/Video";
 import bcrypt from "bcrypt";
 
 export const getJoin = (req, res) =>
@@ -199,6 +200,7 @@ export const finishKakaoLogin = async (req, res) => {
 export const getEdit = (req, res) => {
   return res.render("edit-profile", { pageTitle: "Edit Profile" });
 };
+
 export const postEdit = async (req, res) => {
   const {
     session: {
@@ -296,7 +298,8 @@ export const postChangePassword = async (req, res) => {
 
 export const see = async (req, res) => {
   const { id } = req.params;
-  const user = await User.findById(id);
+  const user = await User.findById(id).populate("videos");
+w
   if (!user) {
     return res.status(404).render("404");
   }
